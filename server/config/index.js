@@ -1,7 +1,6 @@
 const config = {
   db: {
-    url: 'localhost:27017',
-    name: 'chatdb'
+    url: 'mongodb+srv://admin:lekan2020@cluster0.sqql0.mongodb.net/chat?retryWrites=true&w=majority'
   }
 }
 
