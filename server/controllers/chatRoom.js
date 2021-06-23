@@ -31,7 +31,7 @@ export default {
 
       const allUserIds = [...newUserIds, newChatInitiator];
 
-      const chatRoom = await ChatRoomModel.initiateChat(allUserIds, type, newChatInitiator,avatar,groupname,groupdescription);
+      const chatRoom = await ChatRoomModel.initiateChat(allUserIds, type, newChatInitiator,groupname,avatar,groupdescription);
 
       return res.status(200).json({ success: true, chatRoom });
     } catch (error) {
@@ -45,7 +45,8 @@ export default {
         payload: req.body,
         checks: {
           // messageText: { type: types.string },
-          type: { type: types.enum, options: { enum: MESSAGE_TYPES } }, 
+          type: { type: types.enum, options: { enum: MESSAGE_TYPES } },
+          ecodeemId: {type: types.string}
         }
       }));
       if (!validation.success) return res.status(400).json({ ...validation });
@@ -88,7 +89,13 @@ export default {
   },
   getUserRooms: async (req, res) => {
     try {
-      const rooms = await ChatRoomModel.getChatRoomsByUserId(req.params.userId);
+
+      const user = await UserModel.getUserByEcodeemId(req.params.id)
+      const rooms = await ChatRoomModel.getChatRoomsByUserId(user.user._id);
+
+      console.log('====================================');
+      console.log(user.user._id);
+      console.log('====================================');
       
       return res.status(200).json({ success: true, conversations: rooms });
     } catch (error) {
@@ -133,7 +140,13 @@ export default {
         })
       }
 
-      const currentLoggedUser = req.userId;
+      const user = UserModel.getUserByEcodeemIds(req.body.ecodeemId)
+
+      const currentLoggedUser = user._id;
+
+      console.log(currentLoggedUser);
+
+
       const result = await ChatMessageModel.markMessageRead(roomId, currentLoggedUser);
       return res.status(200).json({ success: true, data: result });
     } catch (error) {

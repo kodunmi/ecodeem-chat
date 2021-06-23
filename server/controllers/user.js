@@ -74,4 +74,38 @@ export default {
       return res.status(500).json({ success: false, error: error })
     }
   },
+
+  onGetRecentConversationById:async (req, res) => {
+    try {
+      const user = await UserModel.findOne({ecodeemId: req.params.id})
+      const userId = user._id;
+      const options = {
+        page: parseInt(req.query.page) || 0,
+        limit: parseInt(req.query.limit) || 10,
+      };
+      const rooms = await ChatRoom.getChatRoomsByUserId(userId);
+     
+      // const roomIds = rooms.map(room => room._id);
+
+      // let allcon =  roomIds.forEach(id => {
+        
+      // });
+      // const l = await ChatRoom.getChatRoomByRoomId(id)
+
+    //  roomIds.map(id => {
+        
+    //     return rooms
+    //   })
+
+
+      
+
+    return rooms
+
+
+
+    } catch (error) {
+      return res.status(500).json({ success: false, error: error })
+    }
+  }
 }

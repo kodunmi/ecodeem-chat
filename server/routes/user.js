@@ -1,4 +1,5 @@
 import express from 'express';
+import chatRoom from '../controllers/chatRoom.js';
 // controllers
 import user from '../controllers/user.js';
 
@@ -11,6 +12,7 @@ router
   .delete('/:id', user.onDeleteUserById)
   .get('/:id/groups',user.onGetUserGroups)
   .get('/:id/chats',user.onGetUserChats)
+  .get('/:id/all',chatRoom.getUserRooms)
   
   
   

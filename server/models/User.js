@@ -98,44 +98,52 @@ userSchema.statics.getUserByEcodeemId = async function (ecodeemId) {
     const chats = await ChatRoom.aggregate([
       // { $project : { 'chatInitiator': 0, 'userIds':0 }},
       { $match: {userIds: { $all: [user._id] }, chatType: 'private' }},
-      {
-          $lookup: {
-            from: 'users',
-            localField: 'chatInitiator',
-            foreignField: '_id',
-            as: 'creator'
-          },
-      },
-      {
-        $lookup: {
-          from: 'users',
-          localField: 'userIds',
-          foreignField: '_id',
-          as: 'members'
-        },
-    },
-      {$unwind: '$creator'},
+    //   {
+    //       $lookup: {
+    //         from: 'users',
+    //         localField: 'chatInitiator',
+    //         foreignField: '_id',
+    //         as: 'creator'
+    //       },
+    //   },
+    //   {
+    //     $lookup: {
+    //       from: 'users',
+    //       localField: 'userIds',
+    //       foreignField: '_id',
+    //       as: 'members'
+    //     },
+    // },
+    //   {$unwind: '$creator'},
     ])
 
     const groups = await ChatRoom.aggregate([
       { $match: {userIds: { $all: [user._id] }, chatType: 'group' }},
-      {
-          $lookup: {
-            from: 'users',
-            localField: 'chatInitiator',
-            foreignField: '_id',
-            as: 'creator'
-          },
-      },
-      {
-        $lookup: {
-          from: 'users',
-          localField: 'userIds',
-          foreignField: '_id',
-          as: 'members'
-        },
-    },
-      {$unwind: '$creator'},
+      // {
+      //   $group:{
+      //     _id: '$_id',
+      //     name: '$name',
+      //     avatar:'$avatar',
+      //     descriptiion:'$descriptiion'
+      //   }
+      // }
+    //   {
+    //       $lookup: {
+    //         from: 'users',
+    //         localField: 'chatInitiator',
+    //         foreignField: '_id',
+    //         as: 'creator'
+    //       },
+    //   },
+    //   {
+    //     $lookup: {
+    //       from: 'users',
+    //       localField: 'userIds',
+    //       foreignField: '_id',
+    //       as: 'members'
+    //     },
+    // },
+      // {$unwind: '$creator'},
     ])
 
     return {

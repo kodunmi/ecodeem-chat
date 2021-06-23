@@ -24,7 +24,7 @@ app.set("port", port);
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-
+app.use(cors())
 app.use("/", indexRouter);
 app.use("/users", userRouter);
 app.use("/room", chatRoomRouter);
@@ -39,6 +39,9 @@ app.use('*', (req, res) => {
   })
 });
 
+//Enables CORS from client-side
+
+
 /** Create HTTP server. */
 const server = http.createServer(app);
 /** Create socket connection */
@@ -51,3 +54,11 @@ server.listen(port);
 server.on("listening", () => {
   console.log(`Listening on port:: http://localhost:${port}/`)
 });
+
+// app.use(function(req, res, next) {
+//   res.header("Access-Control-Allow-Origin", "*");
+//   res.header('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, OPTIONS');
+//   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization, Access-Control-Allow-Credentials");
+//   res.header("Access-Control-Allow-Credentials", "true");
+//   next();
+// });

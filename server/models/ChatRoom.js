@@ -16,7 +16,7 @@ const chatRoomSchema = new mongoose.Schema(
     chatInitiator: { type: mongoose.Schema.ObjectId, required: true },
     name: String,
     avatar: String,
-    descriptiion: String
+    description: String
   },
   {
     timestamps: true,
@@ -32,7 +32,87 @@ chatRoomSchema.statics.getChatRoomsByUserId = async function (userId) {
   try {
     const rooms = await this.find({ userIds: { $all: [userId] } });
 
-    return rooms;
+    const agg = this.aggregate([
+      { $match: { userIds: { $all: [userId] } } },
+      {
+        $lookup: {
+          from: 'chatmessages',
+          localField: '_id',
+          foreignField: 'chatRoomId',
+          as: 'messages'
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userIds',
+          foreignField: '_id',
+          as: 'users'
+        },
+      },
+      {
+        $project:
+        {
+          users:{
+            $filter:{
+              input: "$users",
+              as: "user",
+              cond: { $not: [ { $eq: [ "$$user._id", userId ] } ] }
+            }
+          },
+          Unread:{
+            $size:{
+              $filter:{
+              input: "$messages",
+              as: "message",
+              cond: { $not:{$in: [userId, "$$message.readByRecipients.readByUserId"]} }
+            }
+            }
+            
+          },
+          LastMessage: {
+            $last: "$messages"
+          },
+          type: '$chatType',
+          name: '$name',
+          avatar:'$avatar',
+          description:'$description'
+
+        }
+      },
+      // {
+      //   $addFields: {
+      //     messageCount: {
+      //       $size: "$messages"
+      //     }
+      //   }
+      // },
+      // {
+      //   $addFields: {
+      //     latestMessage: {
+      //       $last: "$messages"
+      //     }
+      //   }
+      // },
+      // {
+      //   $addFields: {
+      //     readCount: {
+      //       $size: "$messages.readByRecipients"
+      //     }
+      //   }
+      // },
+      // {
+      //   $addFields: {
+      //     unreadCount: {
+      //       $size:
+      //         "$messages.readByRecipients.readByUserId"
+
+      //     }
+      //   }
+      // },
+    ])
+
+    return agg;
   } catch (error) {
     throw error;
   }
@@ -70,11 +150,10 @@ chatRoomSchema.statics.getChatRoomByRoomId = async function (roomId) {
           foreignField: '_id',
           as: 'members'
         },
-      },
-
+      }
     ]);
 
-    return agg;
+    return room;
   } catch (error) {
     throw error;
   }
@@ -95,24 +174,25 @@ chatRoomSchema.statics.initiateChat = async function (userIds, type, chatInitiat
       chatType: type
     });
 
-    console.log(availableRoom);
+    console.log(description);
 
-    if (availableRoom) {
-      return {
-        isNew: false,
-        message: 'retrieving an old chat room',
-        chatRoomId: availableRoom._doc._id,
-        type: availableRoom._doc.chatType,
-      };
-    }
+    // if (availableRoom) {
+    //   return {
+    //     isNew: false,
+    //     message: 'retrieving an old chat room',
+    //     chatRoomId: availableRoom._doc._id,
+    //     type: availableRoom._doc.chatType,
+    //   };
+    // }
 
     let newRoom = await this.create({ userIds, chatType: type, chatInitiator, name, avatar, description });
 
     return {
-      isNew: true,
+      // isNew: true,
       message: 'creating a new chatroom',
-      chatRoomId: newRoom._doc._id,
-      type: newRoom._doc.chatType,
+      group: newRoom._doc
+      // chatRoomId: newRoom._doc._id,
+      // type: newRoom._doc.chatType,
     };
   } catch (error) {
     console.log('error on start chat method', error);
@@ -134,17 +214,17 @@ chatRoomSchema.statics.addUser = async function (roomId, userId) {
     room.save()
 
     return room
-    
+
   } catch (error) {
     throw error;
   }
 }
 
 chatRoomSchema.statics.removeUser = async function (roomId, userId) {
-  function arrayRemove(arr, value) { 
-    
-    return arr.filter(function(ele){ 
-        return ele != value; 
+  function arrayRemove(arr, value) {
+
+    return arr.filter(function (ele) {
+      return ele != value;
     });
   }
 
@@ -168,7 +248,7 @@ chatRoomSchema.statics.removeUser = async function (roomId, userId) {
     console.log(room);
 
     return room
-    
+
   } catch (error) {
     throw error;
   }
