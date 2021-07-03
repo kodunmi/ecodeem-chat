@@ -5,7 +5,16 @@ import ChatRoom from '../models/ChatRoom.js';
 import UserModel from '../models/User.js';
 
 export default {
+  
   onGetAllUsers: async (req, res) => {
+    try {
+      const users = await UserModel.getUsers();
+      return res.status(200).json({ success: true, users });
+    } catch (error) {
+      return res.status(500).json({ success: false, error: error })
+    }
+  },
+  getAllUnreadMessages: async (req, res) => {
     try {
       const users = await UserModel.getUsers();
       return res.status(200).json({ success: true, users });

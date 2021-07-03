@@ -60,7 +60,8 @@ export default {
 
 
       const post = await ChatMessageModel.createPostInChatRoom(roomId, messagePayload, userId, link, type );
-      global.io.sockets.in(roomId).emit('new message', { message: post });
+      global.io.sockets.in(roomId).emit('NEW_CHAT_MESSAGE_EVENT', { message: post });
+      console.log(roomId);
       return res.status(200).json({ success: true, post });
     } catch (error) {
       return res.status(500).json({ success: false, error: error })
@@ -94,10 +95,23 @@ export default {
       const rooms = await ChatRoomModel.getChatRoomsByUserId(user.user._id);
 
       console.log('====================================');
-      console.log(user.user._id);
+      console.log(rooms[0].users._id);
       console.log('====================================');
       
       return res.status(200).json({ success: true, conversations: rooms });
+    } catch (error) {
+      return res.status(500).json({ success: false, error: error })
+    }
+  },
+  getAllUnreadMessages: async (req,res) => {
+    try {
+
+      const user = await UserModel.getUserByEcodeemId(req.params.id)
+      const rooms = await ChatRoomModel.getChatRoomsByUserId(user.user._id);
+
+      let c = rooms.reduce(function (acc, obj) { return acc + obj.Unread; }, 0); 
+      
+      return res.status(200).json({ success: true, unread: c });
     } catch (error) {
       return res.status(500).json({ success: false, error: error })
     }
@@ -140,14 +154,12 @@ export default {
         })
       }
 
-      const user = UserModel.getUserByEcodeemIds(req.body.ecodeemId)
+      const user = await UserModel.getUserByEcodeemId(req.body.ecodeemId)
 
-      const currentLoggedUser = user._id;
-
-      console.log(currentLoggedUser);
-
+      const currentLoggedUser = user.user._id;
 
       const result = await ChatMessageModel.markMessageRead(roomId, currentLoggedUser);
+
       return res.status(200).json({ success: true, data: result });
     } catch (error) {
       console.log(error);

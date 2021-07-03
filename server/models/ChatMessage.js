@@ -103,7 +103,7 @@ chatMessageSchema.statics.createPostInChatRoom = async function (chatRoomId, mes
           message: { $last: '$message' },
           type: { $last: '$type' },
           link: {$last: '$link'},
-          postedByUser: { $last: '$postedByUser' },
+          postedBy: { $last: '$postedByUser' },
           readByRecipients: { $last: '$readByRecipients' },
           chatRoomInfo: { $addToSet: '$chatRoomInfo.userProfile' },
           createdAt: { $last: '$createdAt' },

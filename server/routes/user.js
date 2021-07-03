@@ -13,6 +13,7 @@ router
   .get('/:id/groups',user.onGetUserGroups)
   .get('/:id/chats',user.onGetUserChats)
   .get('/:id/all',chatRoom.getUserRooms)
+  .get('/:id/unread',chatRoom.getAllUnreadMessages)
   
   
   

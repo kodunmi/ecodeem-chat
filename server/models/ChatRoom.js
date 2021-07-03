@@ -34,14 +34,37 @@ chatRoomSchema.statics.getChatRoomsByUserId = async function (userId) {
 
     const agg = this.aggregate([
       { $match: { userIds: { $all: [userId] } } },
+      // {
+      //   $lookup: {
+      //     from: 'chatmessages',
+      //     localField: '_id',
+      //     foreignField: 'chatRoomId',
+      //     as: 'messages'
+      //   }
+      // },
+
       {
         $lookup: {
-          from: 'chatmessages',
-          localField: '_id',
-          foreignField: 'chatRoomId',
-          as: 'messages'
+          from: "chatmessages",
+          let: { "roomId": "$_id" },
+          pipeline: [
+            { $match: { $expr: { $eq: ["$chatRoomId", "$$roomId"] } } },
+            {
+              $lookup: {
+                from: "users",
+                let: { "userId": "$postedByUser" },
+                pipeline: [
+                  { $match: { "$expr": { "$eq": ["$_id", "$$userId"] } } }
+                ],
+                as: "postedBy"
+              }
+            },
+            {$unwind: "$postedBy"}
+          ],
+          "as": "messages"
         }
       },
+
       {
         $lookup: {
           from: 'users',
@@ -53,30 +76,34 @@ chatRoomSchema.statics.getChatRoomsByUserId = async function (userId) {
       {
         $project:
         {
-          users:{
-            $filter:{
-              input: "$users",
-              as: "user",
-              cond: { $not: [ { $eq: [ "$$user._id", userId ] } ] }
+          users: {
+            $first: {
+              $filter: {
+                input: "$users",
+                as: "user",
+                cond: { $not: [{ $eq: ["$$user._id", userId] }] }
+              }
             }
           },
-          Unread:{
-            $size:{
-              $filter:{
-              input: "$messages",
-              as: "message",
-              cond: { $not:{$in: [userId, "$$message.readByRecipients.readByUserId"]} }
+          Unread: {
+            $size: {
+              $filter: {
+                input: "$messages",
+                as: "message",
+                cond: { $not: { $in: [userId, "$$message.readByRecipients.readByUserId"] } }
+              }
             }
-            }
-            
           },
           LastMessage: {
             $last: "$messages"
           },
+          recentMessages: {
+            $slice: ['$messages', 200],
+          },
           type: '$chatType',
           name: '$name',
-          avatar:'$avatar',
-          description:'$description'
+          avatar: '$avatar',
+          description: '$description'
 
         }
       },

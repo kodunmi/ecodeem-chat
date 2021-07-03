@@ -40,7 +40,7 @@
 const socketEvents = (io) => {
   //Set Listeners
   io.on('connection', (socket)=> {
-    console.log('a user has connected');
+    console.log(`${socket.id} connected`);
 
     socket.on('enter channel', (channel, username) => {
       if (username) {
@@ -63,7 +63,8 @@ const socketEvents = (io) => {
       console.log('new message received in channel', socketMsg)
     });
 
-    socket.on('enter privateMessage', (conversationId) => {
+    socket.on('join', (conversationId) => {
+      console.log(socket.id+'user joined room'+conversationId);
      socket.join(conversationId);
     });
 
