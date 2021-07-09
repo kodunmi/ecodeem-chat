@@ -21,7 +21,11 @@ export default {
 
       const { userId, type, avatar, groupname, groupdescription, ecodeemId } = req.body;
 
+      // console.log(userId, type, avatar, groupname, groupdescription, ecodeemId);
+
       const chatInitiator = await UserModel.getUserByEcodeemId(ecodeemId)
+
+      console.log(chatInitiator);
 
       const newChatInitiator = chatInitiator.user._id
 

@@ -37,33 +37,20 @@
 // }
 
 // export default new WebSockets();
+
+const USER_JOIN_CHAT_EVENT = "USER_JOIN_CHAT_EVENT";
+const USER_LEAVE_CHAT_EVENT = "USER_LEAVE_CHAT_EVENT";
+const NEW_CHAT_MESSAGE_EVENT = "NEW_CHAT_MESSAGE_EVENT";
+const START_TYPING_MESSAGE_EVENT = "START_TYPING_MESSAGE_EVENT";
+const STOP_TYPING_MESSAGE_EVENT = "STOP_TYPING_MESSAGE_EVENT";
+
+
 const socketEvents = (io) => {
   //Set Listeners
   io.on('connection', (socket)=> {
     console.log(`${socket.id} connected`);
 
-    socket.on('enter channel', (channel, username) => {
-      if (username) {
-        socket.join(channel);
-        io.sockets.in(channel).emit('user joined', `${username} has joined the channel`)
-        console.log('user has joined channel' , channel, username)
-      } else {
-        return false
-      }
-    });
-
-    socket.on('leave channel', (channel, username) => {
-      socket.leave(channel);
-      io.sockets.in(channel).emit('user left', `${username} has left the channel`);
-      console.log('user has left channel', channel, username)
-    });
-    
-    socket.on('new message', (socketMsg) => {
-      io.sockets.in(socketMsg.channel).emit('refresh messages', socketMsg);
-      console.log('new message received in channel', socketMsg)
-    });
-
-    socket.on('join', (conversationId) => {
+    socket.on(USER_JOIN_CHAT_EVENT, (conversationId) => {
       console.log(socket.id+'user joined room'+conversationId);
      socket.join(conversationId);
     });
@@ -76,8 +63,15 @@ const socketEvents = (io) => {
       io.sockets.in(socketMsg.conversationId).emit('refresh privateMessages', socketMsg);
     })
 
-    socket.on('user typing', (data) => {
-      io.sockets.in(data.conversationId).emit('typing', data)
+    socket.on(START_TYPING_MESSAGE_EVENT, (data) => {
+      socket.to(data.conversationId).emit(START_TYPING_MESSAGE_EVENT, data)
+
+      console.log('typing',data.conversationId);
+    })
+
+    socket.on(STOP_TYPING_MESSAGE_EVENT, (data) => {
+      socket.to(data.conversationId).emit(STOP_TYPING_MESSAGE_EVENT, data)
+      console.log('stoptyping', data);
     })
 
     socket.on('disconnect', () => {

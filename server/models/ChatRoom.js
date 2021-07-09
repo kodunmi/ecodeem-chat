@@ -107,36 +107,6 @@ chatRoomSchema.statics.getChatRoomsByUserId = async function (userId) {
 
         }
       },
-      // {
-      //   $addFields: {
-      //     messageCount: {
-      //       $size: "$messages"
-      //     }
-      //   }
-      // },
-      // {
-      //   $addFields: {
-      //     latestMessage: {
-      //       $last: "$messages"
-      //     }
-      //   }
-      // },
-      // {
-      //   $addFields: {
-      //     readCount: {
-      //       $size: "$messages.readByRecipients"
-      //     }
-      //   }
-      // },
-      // {
-      //   $addFields: {
-      //     unreadCount: {
-      //       $size:
-      //         "$messages.readByRecipients.readByUserId"
-
-      //     }
-      //   }
-      // },
     ])
 
     return agg;
@@ -195,13 +165,13 @@ chatRoomSchema.statics.initiateChat = async function (userIds, type, chatInitiat
   try {
     const availableRoom = await this.findOne({
       userIds: {
-        $size: userIds.length,
+        $size: 2,
         $all: [...userIds]
       },
-      chatType: type
+      chatType: 'private'
     });
 
-    console.log(description);
+    console.log(availableRoom);
 
     // if (availableRoom) {
     //   return {
