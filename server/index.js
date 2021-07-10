@@ -25,7 +25,12 @@ app.set("port", port);
 app.use(logger("dev"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(cors())
+app.use(cors({
+  origin: "*",
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  allowedHeaders: "*"
+
+}))
 app.use("/", indexRouter);
 app.use("/users", userRouter);
 app.use("/room", chatRoomRouter);
