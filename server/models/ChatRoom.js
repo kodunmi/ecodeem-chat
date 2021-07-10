@@ -76,15 +76,16 @@ chatRoomSchema.statics.getChatRoomsByUserId = async function (userId) {
       {
         $project:
         {
-          users: {
-            $first: {
-              $filter: {
-                input: "$users",
-                as: "user",
-                cond: { $not: [{ $eq: ["$$user._id", userId] }] }
-              }
-            }
-          },
+          // users: {
+          //   $first: {
+          //     $filter: {
+          //       input: "$users",
+          //       as: "user",
+          //       cond: { $not: [{ $eq: ["$$user._id", userId] }] }
+          //     }
+          //   }
+          // },
+          users: "$users",
           Unread: {
             $size: {
               $filter: {
@@ -165,7 +166,6 @@ chatRoomSchema.statics.initiateChat = async function (userIds, type, chatInitiat
   try {
     const availableRoom = await this.findOne({
       userIds: {
-        $size: 2,
         $all: [...userIds]
       },
       chatType: 'private'
@@ -173,21 +173,20 @@ chatRoomSchema.statics.initiateChat = async function (userIds, type, chatInitiat
 
     console.log(availableRoom);
 
-    // if (availableRoom) {
-    //   return {
-    //     isNew: false,
-    //     message: 'retrieving an old chat room',
-    //     chatRoomId: availableRoom._doc._id,
-    //     type: availableRoom._doc.chatType,
-    //   };
-    // }
+    if (availableRoom) {
+      return {
+        isNew: false,
+        message: 'retrieving an old chat room',
+        room: availableRoom._doc,
+      };
+    }
 
     let newRoom = await this.create({ userIds, chatType: type, chatInitiator, name, avatar, description });
 
     return {
-      // isNew: true,
+      isNew: true,
       message: 'creating a new chatroom',
-      group: newRoom._doc
+      room: newRoom._doc
       // chatRoomId: newRoom._doc._id,
       // type: newRoom._doc.chatType,
     };
