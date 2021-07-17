@@ -1,6 +1,9 @@
 import mongoose from "mongoose";
 import { v4 as uuidv4 } from "uuid";
 
+const ObjectId = mongoose.Types.ObjectId;
+
+
 export const MESSAGE_TYPES = {
   TYPE_TEXT: "text",
   TYPE_IMAGE: "image", 
@@ -123,7 +126,7 @@ chatMessageSchema.statics.createPostInChatRoom = async function (chatRoomId, mes
 chatMessageSchema.statics.getConversationByRoomId = async function (chatRoomId, options = {}) {
   try {
     return this.aggregate([
-      { $match: { chatRoomId } },
+      { $match: { chatRoomId: ObjectId(chatRoomId) } },
       { $sort: { createdAt: -1 } },
       // do a join on another table called users, and 
       // get me a user whose _id = postedByUser
@@ -132,10 +135,10 @@ chatMessageSchema.statics.getConversationByRoomId = async function (chatRoomId, 
           from: 'users',
           localField: 'postedByUser',
           foreignField: '_id',
-          as: 'postedByUser',
+          as: 'postedBy',
         }
       },
-      { $unwind: "$postedByUser" },
+      { $unwind: "$postedBy" },
       // apply pagination
       { $skip: options.page * options.limit },
       { $limit: options.limit },

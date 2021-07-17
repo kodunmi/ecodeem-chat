@@ -49,6 +49,7 @@ chatRoomSchema.statics.getChatRoomsByUserId = async function (userId) {
           let: { "roomId": "$_id" },
           pipeline: [
             { $match: { $expr: { $eq: ["$chatRoomId", "$$roomId"] } } },
+            { $sort: { createdAt: -1 } },
             {
               $lookup: {
                 from: "users",
@@ -99,7 +100,7 @@ chatRoomSchema.statics.getChatRoomsByUserId = async function (userId) {
             $last: "$messages"
           },
           recentMessages: {
-            $slice: ['$messages', 200],
+            $slice: ['$messages', 20],
           },
           type: '$chatType',
           name: '$name',

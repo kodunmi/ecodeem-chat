@@ -93,10 +93,6 @@ export default {
 
       const user = await UserModel.getUserByEcodeemId(req.params.id)
       const rooms = await ChatRoomModel.getChatRoomsByUserId(user.user._id);
-
-      console.log('====================================');
-      console.log(rooms[0].users._id);
-      console.log('====================================');
       
       return res.status(200).json({ success: true, conversations: rooms });
     } catch (error) {
@@ -130,14 +126,14 @@ export default {
       }
       const users = await UserModel.getUserByIds(room.userIds);
       const options = {
-        page: parseInt(req.query.page) || 0,
-        limit: parseInt(req.query.limit) || 10,
+        page: parseInt(req.query.page) || 1,
+        limit: parseInt(req.query.limit) || 30,
       };
-      const conversation = await ChatMessageModel.getConversationByRoomId(roomId, options);
+      const messages = await ChatMessageModel.getConversationByRoomId(roomId, options);
       return res.status(200).json({
         success: true,
         room: room[0],
-        conversation,
+        messages,
       });
     } catch (error) {
       return res.status(500).json({ success: false, error });
